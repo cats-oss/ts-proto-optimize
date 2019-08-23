@@ -1,0 +1,42 @@
+{
+  "name": "@cats-oss/ts-proto-optimize",
+  "version": "0.0.1",
+  "description": "It's CLI tool for optimize TypeScript protobuf type-definition file.",
+  "bin": {
+    "ts-proto-optimize": "bin/index.js"
+  },
+  "files": ["bin", "lib"],
+  "scripts": {
+    "prebuild": "rimraf lib tsconfig.tsbuildinfo",
+    "build": "tsc -p .",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cats-oss/ts-proto-optimize.git"
+  },
+  "author": "Cyberagent, Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cats-oss/ts-proto-optimize/issues"
+  },
+  "homepage": "https://github.com/cats-oss/ts-proto-optimize#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "change-case": "^3.1.0",
+    "meow": "^5.0.0",
+    "mkdirp": "^0.5.1",
+    "typescript": "^3.5.3"
+  },
+  "devDependencies": {
+    "@types/change-case": "^2.3.1",
+    "@types/meow": "^5.0.0",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^12.7.2",
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0"
+  }
+}
