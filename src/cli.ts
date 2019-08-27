@@ -24,7 +24,7 @@ ${chalk.yellow("OPTIONS:")}
 
 ${chalk.yellow("EXAMPLES:")}
   $ ts-proto-optimize path/to/proto.d.ts
-  $ ts-proto-optimize path/to/proto.d.ts --output dist/to/proto.d.ts
+  $ ts-proto-optimize path/to/proto.d.ts --output dist/to/proto.ts
   $ ts-proto-optimize path/to/proto.d.ts --ns root:fuga
   $ ts-proto-optimize path/to/proto.d.ts --ns root:fuga --ns hoge:piyo
   $ ts-proto-optimize path/to/proto.d.ts --ns root:

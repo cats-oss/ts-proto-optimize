@@ -1,6 +1,6 @@
 {
   "name": "@cats-oss/ts-proto-optimize",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "It's CLI tool for optimize TypeScript protobuf type-definition file.",
   "bin": {
     "ts-proto-optimize": "bin/index.js"

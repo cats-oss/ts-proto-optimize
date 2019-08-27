@@ -28,7 +28,7 @@ $ npm i -D @cats-oss/ts-proto-optimize
 $ $(npm bin)/ts-proto-optimize path/to/proto.d.ts
 
 # Output to file
-$ $(npm bin)/ts-proto-optimize path/to/proto.d.ts --output dist/to/proto.d.ts
+$ $(npm bin)/ts-proto-optimize path/to/proto.d.ts --output dist/to/proto.ts
 ```
 
 ### Example
