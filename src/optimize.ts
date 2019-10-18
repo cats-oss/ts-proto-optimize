@@ -54,7 +54,8 @@ const updateTypeNodeIfNeeded = (
 const transformer = (nsReplacement: NamespaceReplacement) => (
   context: ts.TransformationContext
 ) => (rootNode: ts.SourceFile) => {
-  let replacements = <any>ts.createNodeArray();
+  let enumList = <any>ts.createNodeArray();
+  let classList = <any>ts.createNodeArray();
 
   const extractEnum = (parentNamespace: string) => (node: ts.Node) => {
     const parent = nsReplacement.hasOwnProperty(parentNamespace)
@@ -65,8 +66,8 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
     const ns = parent !== "" ? `${parent}_` : "";
 
     if (ts.isEnumDeclaration(node)) {
-      replacements = [
-        ...replacements,
+      enumList = [
+        ...enumList,
         ts.createEnumDeclaration(
           node.decorators,
           [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
@@ -83,6 +84,16 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
 
   rootNode.forEachChild(extractEnum(""));
 
+  const removeNamespaceVisitor = (node: ts.Node): any => {
+    node = ts.visitEachChild(node, removeNamespaceVisitor, context);
+
+    if (ts.isModuleDeclaration(node) && classList.includes(node.name.text)) {
+      return null;
+    }
+
+    return node;
+  };
+
   const visitor = (node: ts.Node): any => {
     node = ts.visitEachChild(node, visitor, context);
 
@@ -97,6 +108,7 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
 
     // Remove `class` definition
     if (ts.isClassDeclaration(node)) {
+      classList = [...classList, node.name!.escapedText]
       return null;
     }
 
@@ -190,10 +202,10 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
   };
 
   rootNode = ts.visitNode(rootNode, visitor);
+  rootNode = ts.visitNode(rootNode, removeNamespaceVisitor);
 
   // Append formatted `enum` list to node statements
-  rootNode.statements = <any>[...rootNode.statements, ...replacements];
-
+  rootNode.statements = <any>[...rootNode.statements, ...enumList];
   return rootNode;
 };
 
