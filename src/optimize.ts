@@ -94,6 +94,21 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
     return node;
   };
 
+  const shallowVisitor = (node: ts.Node): any => {
+    return ts.visitEachChild(node, n => {
+      if (ts.isModuleDeclaration(n)){
+        return ts.updateModuleDeclaration(
+          n,
+          n.decorators,
+          [...n.modifiers!, ts.createModifier(ts.SyntaxKind.DeclareKeyword)],
+          n.name,
+          n.body
+        );
+      }
+      return n;
+    }, context);
+  }
+
   const visitor = (node: ts.Node): any => {
     node = ts.visitEachChild(node, visitor, context);
 
@@ -203,6 +218,7 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
 
   rootNode = ts.visitNode(rootNode, visitor);
   rootNode = ts.visitNode(rootNode, removeNamespaceVisitor);
+  rootNode = ts.visitNode(rootNode, shallowVisitor);
 
   // Append formatted `enum` list to node statements
   rootNode.statements = <any>[...rootNode.statements, ...enumList];
