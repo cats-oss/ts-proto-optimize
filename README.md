@@ -100,36 +100,37 @@ export namespace root {
 **output:**
 
 ```typescript
-export namespace root {
-  /** Namespace api. */
-  export namespace api {
-    /** Properties of a Foo */
-    export interface IFoo {
-      /** Foo str */
-      str: string;
-      /** Foo number */
-      num: number;
+/** Namespace root. */
+export declare namespace root {
+    /** Namespace api. */
+    export namespace api {
+        /** Properties of a Foo */
+        export interface IFoo {
+            /** Foo str */
+            str: (string);
+            /** Foo number */
+            num: (number);
+        }
+        export namespace Nest {
+            /** Properties Data */
+            export interface IData {
+                name: (string);
+                value: (number);
+                field: (root.api.Nest.IData);
+                enumratee: (RootApiNestEnum);
+            }
+        }
     }
-    export namespace Nest {
-      /** Properties Data */
-      export interface IData {
-        name: string;
-        value: number;
-        field: root.api.Nest.IData;
-        enumratee: RootApiNestEnum;
-      }
-    }
-  }
 }
 export enum RootApiEnum {
-  KEY1_SNAKE_CASE = 0,
-  KEY2_SNAKE_CASE = 1,
-  KEY3_SNAKE_CASE = 2
+    KEY1_SNAKE_CASE = 0,
+    KEY2_SNAKE_CASE = 1,
+    KEY3_SNAKE_CASE = 2
 }
 export enum RootApiNestEnum {
-  KEY1 = 0,
-  KEY2 = 1,
-  KEY3 = 2
+    KEY1 = 0,
+    KEY2 = 1,
+    KEY3 = 2
 }
 ```
 

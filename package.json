@@ -6,6 +6,9 @@
     "test": "jest",
     "prebuild": "rimraf lib tsconfig.tsbuildinfo",
     "build": "tsc -p .",
+    "release:patch": "standard-version --release-as patch",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
     "prepublish": "npm run build"
   },
   "bin": {
