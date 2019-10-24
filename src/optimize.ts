@@ -1,10 +1,10 @@
-import { pascalCase } from "change-case";
-import ts from "typescript";
-import { NamespaceReplacement } from "./types";
+import { pascalCase } from 'change-case';
+import ts from 'typescript';
+import { NamespaceReplacement } from './types';
 
 const nsReplaceIfNeeded = (replacement: NamespaceReplacement, ns: string) => {
   if (replacement.hasOwnProperty(ns)) {
-    return replacement[ns] || "";
+    return replacement[ns] || '';
   }
 
   return ns;
@@ -14,10 +14,7 @@ const concatPropertyEnumName = (
   replacement: NamespaceReplacement,
   node: ts.QualifiedName
 ): string => {
-  const name = nsReplaceIfNeeded(
-    replacement,
-    node.right.escapedText.toString()
-  );
+  const name = nsReplaceIfNeeded(replacement, node.right.escapedText.toString());
 
   if (ts.isQualifiedName(node.left)) {
     return `${concatPropertyEnumName(replacement, node.left)}_${name}`;
@@ -26,7 +23,7 @@ const concatPropertyEnumName = (
   return `${
     ts.isIdentifier(node.left)
       ? `${nsReplaceIfNeeded(replacement, node.left.escapedText.toString())}_`
-      : ""
+      : ''
   }${name}`;
 };
 
@@ -41,9 +38,7 @@ const updateTypeNodeIfNeeded = (
   ) {
     return ts.updateTypeReferenceNode(
       node,
-      ts.createIdentifier(
-        pascalCase(concatPropertyEnumName(replacement, node.typeName))
-      ),
+      ts.createIdentifier(pascalCase(concatPropertyEnumName(replacement, node.typeName))),
       node.typeArguments
     );
   }
@@ -63,7 +58,7 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
       : parentNamespace;
 
     // const ns = parentNamespace !== "" ? `${parentNamespace}_` : "";
-    const ns = parent !== "" ? `${parent}_` : "";
+    const ns = parent !== '' ? `${parent}_` : '';
 
     if (ts.isEnumDeclaration(node)) {
       enumList = [
@@ -82,48 +77,21 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
     }
   };
 
-  rootNode.forEachChild(extractEnum(""));
-
-  const removeNamespaceVisitor = (node: ts.Node): any => {
-    node = ts.visitEachChild(node, removeNamespaceVisitor, context);
-
-    if (ts.isModuleDeclaration(node) && classList.includes(node.name.text)) {
-      return null;
-    }
-
-    return node;
-  };
-
-  const shallowVisitor = (node: ts.Node): any => {
-    return ts.visitEachChild(node, n => {
-      if (ts.isModuleDeclaration(n)){
-        return ts.updateModuleDeclaration(
-          n,
-          n.decorators,
-          [...n.modifiers!, ts.createModifier(ts.SyntaxKind.DeclareKeyword)],
-          n.name,
-          n.body
-        );
-      }
-      return n;
-    }, context);
-  }
-
-  const visitor = (node: ts.Node): any => {
-    node = ts.visitEachChild(node, visitor, context);
+  const optimizeVisitor = (node: ts.Node): any => {
+    node = ts.visitEachChild(node, optimizeVisitor, context);
 
     // Remove `protobufjs`
     if (
       ts.isImportDeclaration(node) &&
       ts.isStringLiteral(node.moduleSpecifier) &&
-      (<any>node.moduleSpecifier).text === "protobufjs"
+      (<any>node.moduleSpecifier).text === 'protobufjs'
     ) {
       return null;
     }
 
     // Remove `class` definition
     if (ts.isClassDeclaration(node)) {
-      classList = [...classList, node.name!.escapedText]
+      classList = [...classList, node.name!.escapedText];
       return null;
     }
 
@@ -154,10 +122,7 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
               return false;
             }
 
-            if (
-              ts.isTypeReferenceNode(t) &&
-              (<any>t.typeName).escapedText === "Long"
-            ) {
+            if (ts.isTypeReferenceNode(t) && (<any>t.typeName).escapedText === 'Long') {
               return false;
             }
 
@@ -216,27 +181,51 @@ const transformer = (nsReplacement: NamespaceReplacement) => (
     return node;
   };
 
-  rootNode = ts.visitNode(rootNode, visitor);
+  const removeNamespaceVisitor = (node: ts.Node): any => {
+    node = ts.visitEachChild(node, removeNamespaceVisitor, context);
+
+    if (ts.isModuleDeclaration(node) && classList.includes(node.name.text)) {
+      return null;
+    }
+
+    return node;
+  };
+
+  const shallowVisitor = (node: ts.Node): any =>
+    ts.visitEachChild(
+      node,
+      child => {
+        if (ts.isModuleDeclaration(child)) {
+          return ts.updateModuleDeclaration(
+            child,
+            child.decorators,
+            [...child.modifiers!, ts.createModifier(ts.SyntaxKind.DeclareKeyword)],
+            child.name,
+            child.body
+          );
+        }
+
+        return child;
+      },
+      context
+    );
+
+  // Process rootNode
+  rootNode.forEachChild(extractEnum(''));
+
+  rootNode = ts.visitNode(rootNode, optimizeVisitor);
   rootNode = ts.visitNode(rootNode, removeNamespaceVisitor);
   rootNode = ts.visitNode(rootNode, shallowVisitor);
 
   // Append formatted `enum` list to node statements
   rootNode.statements = <any>[...rootNode.statements, ...enumList];
+
   return rootNode;
 };
 
-export const optimize = (
-  input: string,
-  nsReplacement: NamespaceReplacement
-) => {
+export const optimize = (input: string, nsReplacement: NamespaceReplacement) => {
   const printer = ts.createPrinter();
-  const source = ts.createSourceFile(
-    "",
-    input,
-    ts.ScriptTarget.ESNext,
-    false,
-    ts.ScriptKind.TS
-  );
+  const source = ts.createSourceFile('', input, ts.ScriptTarget.ESNext, false, ts.ScriptKind.TS);
 
   const result = ts.transform(source, [transformer(nsReplacement)]);
 

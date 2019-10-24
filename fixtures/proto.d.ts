@@ -1,24 +1,5 @@
 import * as $protobuf from "protobufjs";
 
-export namespace depth1 {
-  namespace depth2 {
-    namespace depth3{
-      interface IFoo {
-        /** Foo str */
-        str?: string | null;
-  
-        /** Foo bool */
-        bool?: boolean | null;
-  
-        /** Foo number */
-        num?: number | Long | null;
-  
-        /** Foo metadata */
-        metadata?: { [k: string]: string } | null;
-      }
-    }
-  }
-}
 /** Namespace root. */
 export namespace root {
   /** Namespace api. */
@@ -176,6 +157,18 @@ export namespace root {
       /** Represents Data */
       class Data implements IData {
         constructor(properties?: root.api.Nest.IData);
+      }
+    }
+  }
+}
+
+/** Namespace depth1. */
+export namespace depth1 {
+  namespace depth2 {
+    namespace depth3 {
+      interface IFoo {
+        /** Foo key */
+        key?: string | null;
       }
     }
   }
