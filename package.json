@@ -2,15 +2,19 @@
   "name": "@cats-oss/ts-proto-optimize",
   "version": "0.0.2",
   "description": "It's CLI tool for optimize TypeScript protobuf type-definition file.",
+  "scripts": {
+    "test": "jest",
+    "prebuild": "rimraf lib tsconfig.tsbuildinfo",
+    "build": "tsc -p .",
+    "prepublish": "npm run build"
+  },
   "bin": {
     "ts-proto-optimize": "bin/index.js"
   },
-  "files": ["bin", "lib"],
-  "scripts": {
-    "prebuild": "rimraf lib tsconfig.tsbuildinfo",
-    "build": "tsc -p .",
-    "prepare": "npm run build"
-  },
+  "files": [
+    "bin",
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/cats-oss/ts-proto-optimize.git"
@@ -33,10 +37,18 @@
   },
   "devDependencies": {
     "@types/change-case": "^2.3.1",
+    "@types/jest": "^24.0.19",
     "@types/meow": "^5.0.0",
     "@types/mkdirp": "^0.5.2",
     "@types/node": "^12.7.2",
-    "prettier": "^1.18.2",
-    "rimraf": "^3.0.0"
-  }
+    "jest": "^24.9.0",
+    "rimraf": "^3.0.0",
+    "standard-version": "^7.0.0",
+    "ts-jest": "^24.1.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  },
+  "standard-version": {}
 }

@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`optimize - with ns 1`] = `
+"/** Namespace root. */
+export declare namespace root {
+    /** Namespace api. */
+    export namespace api {
+        /** Properties of a Foo */
+        export interface IFoo {
+            /** Foo str */
+            str: (string);
+            /** Foo bool */
+            bool: (boolean);
+            /** Foo number */
+            num: (number);
+            /** Foo metadata */
+            metadata: ({
+                [k: string]: string;
+            });
+        }
+        /** Properties of a Enumerate */
+        export interface IEnumerate {
+            /** Enumerate id */
+            id: (string);
+            /** Enumrate field */
+            field: (ExampleEnum);
+            /** Enumrate arr */
+            arr: (ExampleEnum[]);
+        }
+        export namespace Nest {
+            /** Properties Data */
+            export interface IData {
+                name: (string);
+                value: (number);
+                field: (root.api.Nest.IData);
+                enumratee: (ExampleNestEnum);
+            }
+        }
+    }
+}
+/** Namespace depth1. */
+export declare namespace depth1 {
+    export namespace depth2 {
+        export namespace depth3 {
+            export interface IFoo {
+                /** Foo key */
+                key: (string);
+            }
+        }
+    }
+}
+export enum ExampleEnum {
+    KEY1_SNAKE_CASE = 0,
+    KEY2_SNAKE_CASE = 1,
+    KEY3_SNAKE_CASE = 2
+}
+export enum ExampleNestEnum {
+    KEY1 = 0,
+    KEY2 = 1,
+    KEY3 = 2
+}
+"
+`;
+
+exports[`optimize - without ns 1`] = `
+"/** Namespace root. */
+export declare namespace root {
+    /** Namespace api. */
+    export namespace api {
+        /** Properties of a Foo */
+        export interface IFoo {
+            /** Foo str */
+            str: (string);
+            /** Foo bool */
+            bool: (boolean);
+            /** Foo number */
+            num: (number);
+            /** Foo metadata */
+            metadata: ({
+                [k: string]: string;
+            });
+        }
+        /** Properties of a Enumerate */
+        export interface IEnumerate {
+            /** Enumerate id */
+            id: (string);
+            /** Enumrate field */
+            field: (RootApiEnum);
+            /** Enumrate arr */
+            arr: (RootApiEnum[]);
+        }
+        export namespace Nest {
+            /** Properties Data */
+            export interface IData {
+                name: (string);
+                value: (number);
+                field: (root.api.Nest.IData);
+                enumratee: (RootApiNestEnum);
+            }
+        }
+    }
+}
+/** Namespace depth1. */
+export declare namespace depth1 {
+    export namespace depth2 {
+        export namespace depth3 {
+            export interface IFoo {
+                /** Foo key */
+                key: (string);
+            }
+        }
+    }
+}
+export enum RootApiEnum {
+    KEY1_SNAKE_CASE = 0,
+    KEY2_SNAKE_CASE = 1,
+    KEY3_SNAKE_CASE = 2
+}
+export enum RootApiNestEnum {
+    KEY1 = 0,
+    KEY2 = 1,
+    KEY3 = 2
+}
+"
+`;
