@@ -1,10 +1,10 @@
-import { pascalCase } from 'change-case';
 import ts from 'typescript';
+import { pascalCase } from 'change-case';
 import { NamespaceReplacement } from './types';
 
 const nsReplaceIfNeeded = (replacement: NamespaceReplacement, ns: string) => {
-  if (replacement.hasOwnProperty(ns)) {
-    return replacement[ns] || '';
+  if (replacement.has(ns)) {
+    return replacement.get(ns)!;
   }
 
   return ns;
@@ -12,9 +12,12 @@ const nsReplaceIfNeeded = (replacement: NamespaceReplacement, ns: string) => {
 
 const concatPropertyEnumName = (
   replacement: NamespaceReplacement,
-  node: ts.QualifiedName
+  node: ts.QualifiedName,
 ): string => {
-  const name = nsReplaceIfNeeded(replacement, node.right.escapedText.toString());
+  const name = nsReplaceIfNeeded(
+    replacement,
+    node.right.escapedText.toString(),
+  );
 
   if (ts.isQualifiedName(node.left)) {
     return `${concatPropertyEnumName(replacement, node.left)}_${name}`;
@@ -29,205 +32,231 @@ const concatPropertyEnumName = (
 
 const updateTypeNodeIfNeeded = (
   replacement: NamespaceReplacement,
-  node: ts.TypeNode
+  node: ts.TypeNode,
 ): ts.TypeNode => {
   if (
     ts.isTypeReferenceNode(node) &&
     ts.isQualifiedName(node.typeName) &&
     !/^I[A-Z]/.test(node.typeName.right.escapedText.toString())
   ) {
-    return ts.updateTypeReferenceNode(
+    return ts.factory.updateTypeReferenceNode(
       node,
-      ts.createIdentifier(pascalCase(concatPropertyEnumName(replacement, node.typeName))),
-      node.typeArguments
+      ts.factory.createIdentifier(
+        pascalCase(concatPropertyEnumName(replacement, node.typeName)),
+      ),
+      node.typeArguments,
     );
   }
 
   return node;
 };
 
-const transformer = (nsReplacement: NamespaceReplacement) => (
-  context: ts.TransformationContext
-) => (rootNode: ts.SourceFile) => {
-  let enumList = <any>ts.createNodeArray();
-  let classList = <any>ts.createNodeArray();
+const transformer =
+  (nsReplacement: NamespaceReplacement): ts.TransformerFactory<ts.Node> =>
+  (context) =>
+  (source) => {
+    const classList: Set<string> = new Set();
+    let enumList = ts.factory.createNodeArray<ts.Statement>();
 
-  const extractEnum = (parentNamespace: string) => (node: ts.Node) => {
-    const parent = nsReplacement.hasOwnProperty(parentNamespace)
-      ? nsReplacement[parentNamespace]
-      : parentNamespace;
+    /**
+     * Extract enum
+     */
+    const extractEnum = (parentNamespace: string) => (node: ts.Node) => {
+      const parent = nsReplacement.has(parentNamespace)
+        ? nsReplacement.get(parentNamespace)!
+        : parentNamespace;
 
-    // const ns = parentNamespace !== "" ? `${parentNamespace}_` : "";
-    const ns = parent !== '' ? `${parent}_` : '';
+      const ns = parent !== '' ? `${parent}_` : '';
 
-    if (ts.isEnumDeclaration(node)) {
-      enumList = [
-        ...enumList,
-        ts.createEnumDeclaration(
-          node.decorators,
-          [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
-          ts.createIdentifier(pascalCase(`${ns}${node.name.text}`)),
-          node.members
-        )
-      ];
-    }
+      if (ts.isEnumDeclaration(node)) {
+        enumList = ts.factory.createNodeArray([
+          ...enumList,
+          ts.factory.createEnumDeclaration(
+            node.decorators,
+            [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+            ts.factory.createIdentifier(pascalCase(`${ns}${node.name.text}`)),
+            node.members,
+          ),
+        ]);
+      }
 
-    if (ts.isModuleDeclaration(node) && node.body != null) {
-      ts.forEachChild(node.body, extractEnum(`${ns}${node.name.text}`));
-    }
-  };
+      if (ts.isModuleDeclaration(node) && node.body != null) {
+        ts.forEachChild(node.body, extractEnum(`${ns}${node.name.text}`));
+      }
+    };
 
-  const optimizeVisitor = (node: ts.Node): any => {
-    node = ts.visitEachChild(node, optimizeVisitor, context);
+    /**
+     * Optimize
+     */
+    const optimizeVisitor: ts.Visitor = (node) => {
+      node = ts.visitEachChild(node, optimizeVisitor, context);
 
-    // Remove `protobufjs`
-    if (
-      ts.isImportDeclaration(node) &&
-      ts.isStringLiteral(node.moduleSpecifier) &&
-      (<any>node.moduleSpecifier).text === 'protobufjs'
-    ) {
-      return null;
-    }
-
-    // Remove `class` definition
-    if (ts.isClassDeclaration(node)) {
-      classList = [...classList, node.name!.escapedText];
-      return null;
-    }
-
-    // Remove `enum` definition
-    if (ts.isEnumDeclaration(node)) {
-      return null;
-    }
-
-    // Format union types
-    //   - Remove `null`, `Long`
-    //   - Concat `enum` name
-    if (ts.isPropertySignature(node) && node.type != null) {
-      let unionTypes: ts.NodeArray<ts.TypeNode> | null = null;
-      if (ts.isUnionTypeNode(node.type)) {
-        unionTypes = node.type.types;
-      } else if (
-        ts.isParenthesizedTypeNode(node.type) &&
-        node.type.type != null &&
-        ts.isUnionTypeNode(node.type.type)
+      // Remove `protobufjs`
+      if (
+        ts.isImportDeclaration(node) &&
+        ts.isStringLiteral(node.moduleSpecifier) &&
+        (<any>node.moduleSpecifier).text === 'protobufjs'
       ) {
-        unionTypes = node.type.type.types;
+        return undefined;
       }
 
-      if (unionTypes != null) {
-        const types = unionTypes
-          .filter(t => {
-            if (t.kind === ts.SyntaxKind.NullKeyword) {
-              return false;
-            }
-
-            if (ts.isTypeReferenceNode(t) && (<any>t.typeName).escapedText === 'Long') {
-              return false;
-            }
-
-            return true;
-          })
-          .map(t => {
-            if (ts.isArrayTypeNode(t)) {
-              return ts.updateArrayTypeNode(
-                t,
-                updateTypeNodeIfNeeded(nsReplacement, t.elementType)
-              );
-            }
-
-            if (ts.isTypeReferenceNode(t)) {
-              return updateTypeNodeIfNeeded(nsReplacement, t);
-            }
-
-            return t;
-          });
-
-        return ts.updatePropertySignature(
-          node,
-          node.modifiers,
-          node.name,
-          undefined, // Remove optional
-          ts.createParenthesizedType(ts.createUnionTypeNode(types)),
-          node.initializer
-        );
+      // Remove `class` definition
+      if (ts.isClassDeclaration(node)) {
+        classList.add(node.name!.escapedText.toString());
+        return undefined;
       }
-    }
 
-    // Add `export` to `namespace`
-    if (ts.isModuleDeclaration(node)) {
-      return ts.updateModuleDeclaration(
-        node,
-        node.decorators,
-        [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
-        node.name,
-        node.body
-      );
-    }
+      // Remove `enum` definition
+      if (ts.isEnumDeclaration(node)) {
+        return undefined;
+      }
 
-    // Add `export` to `interface`
-    if (ts.isInterfaceDeclaration(node)) {
-      return ts.updateInterfaceDeclaration(
-        node,
-        node.decorators,
-        [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
-        node.name,
-        node.typeParameters,
-        node.heritageClauses,
-        node.members
-      );
-    }
-
-    return node;
-  };
-
-  const removeNamespaceVisitor = (node: ts.Node): any => {
-    node = ts.visitEachChild(node, removeNamespaceVisitor, context);
-
-    if (ts.isModuleDeclaration(node) && classList.includes(node.name.text)) {
-      return null;
-    }
-
-    return node;
-  };
-
-  const shallowVisitor = (node: ts.Node): any =>
-    ts.visitEachChild(
-      node,
-      child => {
-        if (ts.isModuleDeclaration(child)) {
-          return ts.updateModuleDeclaration(
-            child,
-            child.decorators,
-            [...child.modifiers!, ts.createModifier(ts.SyntaxKind.DeclareKeyword)],
-            child.name,
-            child.body
-          );
+      // Format union types
+      //   - Remove `null`, `Long`
+      //   - Concat `enum` name
+      if (ts.isPropertySignature(node) && node.type != null) {
+        let unionTypes: ts.NodeArray<ts.TypeNode> | null = null;
+        if (ts.isUnionTypeNode(node.type)) {
+          unionTypes = node.type.types;
+        } else if (
+          ts.isParenthesizedTypeNode(node.type) &&
+          node.type.type != null &&
+          ts.isUnionTypeNode(node.type.type)
+        ) {
+          unionTypes = node.type.type.types;
         }
 
-        return child;
-      },
-      context
-    );
+        if (unionTypes != null) {
+          ts.factory.createNull();
+          const types = unionTypes
+            .filter((t) => {
+              if (
+                ts.isLiteralTypeNode(t) &&
+                t.literal.kind === ts.SyntaxKind.NullKeyword
+              ) {
+                return false;
+              }
 
-  // Process rootNode
-  rootNode.forEachChild(extractEnum(''));
+              if (
+                ts.isTypeReferenceNode(t) &&
+                (<any>t.typeName).escapedText === 'Long'
+              ) {
+                return false;
+              }
 
-  rootNode = ts.visitNode(rootNode, optimizeVisitor);
-  rootNode = ts.visitNode(rootNode, removeNamespaceVisitor);
-  rootNode = ts.visitNode(rootNode, shallowVisitor);
+              return true;
+            })
+            .map((t) => {
+              if (ts.isArrayTypeNode(t)) {
+                return ts.factory.updateArrayTypeNode(
+                  t,
+                  updateTypeNodeIfNeeded(nsReplacement, t.elementType),
+                );
+              }
 
-  // Append formatted `enum` list to node statements
-  rootNode.statements = <any>[...rootNode.statements, ...enumList];
+              if (ts.isTypeReferenceNode(t)) {
+                return updateTypeNodeIfNeeded(nsReplacement, t);
+              }
 
-  return rootNode;
-};
+              return t;
+            });
 
-export const optimize = (input: string, nsReplacement: NamespaceReplacement) => {
-  const printer = ts.createPrinter();
-  const source = ts.createSourceFile('', input, ts.ScriptTarget.ESNext, false, ts.ScriptKind.TS);
+          return ts.factory.updatePropertySignature(
+            node,
+            node.modifiers,
+            node.name,
+            undefined,
+            ts.factory.createParenthesizedType(
+              ts.factory.createUnionTypeNode(types),
+            ),
+          );
+        }
+      }
 
-  const result = ts.transform(source, [transformer(nsReplacement)]);
+      // Add `export` to `namespace`
+      if (ts.isModuleDeclaration(node)) {
+        return ts.factory.updateModuleDeclaration(
+          node,
+          node.decorators,
+          [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+          node.name,
+          node.body,
+        );
+      }
 
-  return printer.printFile(result.transformed[0]);
+      // Add `export` to `interface`
+      if (ts.isInterfaceDeclaration(node)) {
+        return ts.factory.updateInterfaceDeclaration(
+          node,
+          node.decorators,
+          [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+          node.name,
+          node.typeParameters,
+          node.heritageClauses,
+          node.members,
+        );
+      }
+
+      return node;
+    };
+
+    /**
+     * Remove namespace
+     */
+    const removeNamespaceVisitor: ts.Visitor = (node) => {
+      node = ts.visitEachChild(node, removeNamespaceVisitor, context);
+
+      if (ts.isModuleDeclaration(node) && classList.has(node.name.text)) {
+        return undefined;
+      }
+
+      return node;
+    };
+
+    /**
+     * Add declare
+     */
+    const declareVisitor: ts.Visitor = (node) =>
+      ts.visitEachChild(
+        node,
+        (child) => {
+          if (ts.isModuleDeclaration(child)) {
+            return ts.factory.updateModuleDeclaration(
+              child,
+              child.decorators,
+              [
+                ...child.modifiers!,
+                ts.factory.createModifier(ts.SyntaxKind.DeclareKeyword),
+              ],
+              child.name,
+              child.body,
+            );
+          }
+          return child;
+        },
+        context,
+      );
+
+    // Process SourceFile
+    source.forEachChild(extractEnum(''));
+    source = ts.visitNode(source, optimizeVisitor);
+    source = ts.visitNode(source, declareVisitor);
+    source = ts.visitNode(source, removeNamespaceVisitor);
+
+    // Append formatted `enum` list to node statements
+    source = ts.factory.updateSourceFile(source as ts.SourceFile, [
+      ...(source as ts.SourceFile).statements,
+      ...enumList,
+    ]);
+
+    return source;
+  };
+
+export const optimize = (
+  input: string,
+  nsReplacement: NamespaceReplacement,
+) => {
+  const source = ts.createSourceFile('', input, ts.ScriptTarget.Latest, true);
+  const { transformed } = ts.transform(source, [transformer(nsReplacement)]);
+  return ts.createPrinter().printFile(transformed[0] as any);
 };

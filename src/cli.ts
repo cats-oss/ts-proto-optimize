@@ -1,28 +1,28 @@
-import path from "path";
-import fs from "fs";
-import meow from "meow";
-import chalk from "chalk";
-import mkdirp from "mkdirp";
-import { optimize } from "./optimize";
-import { NamespaceReplacement } from "./types";
+import path from 'path';
+import fs from 'fs';
+import meow from 'meow';
+import chalk from 'chalk';
+import mkdirp from 'mkdirp';
+import { optimize } from './optimize';
+import { NamespaceReplacement } from './types';
 
 const Status = {
   OK: 0,
-  ERROR: 1
+  ERROR: 1,
 } as const;
 
 const cli = meow(
   `
-${chalk.yellow("USAGE:")}
+${chalk.yellow('USAGE:')}
   $ ts-proto-optimize [options] path
 
-${chalk.yellow("OPTIONS:")}
+${chalk.yellow('OPTIONS:')}
   --output, -o   Path to output file
   --ns           Namespace replacement config (e.g. "before:after")
   --help, -h     Show this help
   --version, -v  Show current version
 
-${chalk.yellow("EXAMPLES:")}
+${chalk.yellow('EXAMPLES:')}
   $ ts-proto-optimize path/to/proto.d.ts
   $ ts-proto-optimize path/to/proto.d.ts --output dist/to/proto.ts
   $ ts-proto-optimize path/to/proto.d.ts --ns root:fuga
@@ -32,20 +32,20 @@ ${chalk.yellow("EXAMPLES:")}
   {
     flags: {
       output: {
-        type: "string",
-        alias: "o"
+        type: 'string',
+        alias: 'o',
       },
       ns: {
-        type: "string"
+        type: 'string',
       },
       help: {
-        alias: "h"
+        alias: 'h',
       },
       version: {
-        alias: "v"
-      }
-    }
-  }
+        alias: 'v',
+      },
+    },
+  },
 );
 
 const fileExists = (input: string) => {
@@ -57,27 +57,31 @@ const fileExists = (input: string) => {
 };
 
 const parseNamespaces = (
-  input: string | string[] | undefined
+  input: string | string[] | undefined,
 ): NamespaceReplacement => {
+  const map = new Map();
+
   if (input == null) {
-    return {};
+    return map;
   }
 
   if (Array.isArray(input)) {
-    return input
-      .map(v => parseNamespaces(v))
-      .reduce(
-        (acc, cur) => ({
-          ...acc,
-          ...cur
-        }),
-        {}
-      );
+    input
+      .map((v) => parseNamespaces(v))
+      .forEach((m) => {
+        m.forEach((v, k) => {
+          map.set(k, v);
+        });
+      });
+
+    return map;
   }
 
-  const [key, value] = input.split(":");
+  const [key, value] = input.split(':');
 
-  return { [key]: value };
+  map.set(key, value);
+
+  return map;
 };
 
 (async () => {
@@ -92,7 +96,7 @@ const parseNamespaces = (
     const output =
       cli.flags.output != null ? path.join(cwd, cli.flags.output) : null;
 
-    const input = fs.readFileSync(filepath, { encoding: "utf8" });
+    const input = fs.readFileSync(filepath, { encoding: 'utf8' });
     const result = optimize(input, parseNamespaces(cli.flags.ns));
 
     if (output == null) {
@@ -105,7 +109,7 @@ const parseNamespaces = (
     process.exit(Status.OK);
   } catch (e) {
     console.error(
-      `${chalk.bgRed.bold.white(" ERROR ")} ${chalk.red(e.message)}`
+      `${chalk.bgRed.bold.white(' ERROR ')} ${chalk.red(e.message)}`,
     );
 
     process.exit(Status.ERROR);
