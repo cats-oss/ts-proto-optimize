@@ -1,5 +1,7 @@
 # `@cats-oss/ts-proto-optimize`
 
+[![Continuous Integration](https://github.com/cats-oss/ts-proto-optimize/actions/workflows/ci.yml/badge.svg)](https://github.com/cats-oss/ts-proto-optimize/actions/workflows/ci.yml)
+
 > **[EXPERIMENTAL]** It's CLI tool for optimize TypeScript protobuf type-definition file.
 
 Optimize the definition of a protobuf that is only used to get type-safe. Compilation using Babel becomes possible.

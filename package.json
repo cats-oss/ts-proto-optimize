@@ -4,12 +4,12 @@
   "description": "It's CLI tool for optimize TypeScript protobuf type-definition file.",
   "scripts": {
     "test": "jest",
-    "prebuild": "rimraf lib tsconfig.tsbuildinfo",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
     "build": "tsc -p .",
     "release:patch": "standard-version --release-as patch",
     "release:minor": "standard-version --release-as minor",
     "release:major": "standard-version --release-as major",
-    "prepublish": "npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "bin": {
     "ts-proto-optimize": "bin/index.js"

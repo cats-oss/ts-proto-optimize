@@ -1,18 +1,17 @@
 name: Continuous Integration
-on:
-  push:
-    tags:
-      - '!v*'
+
+on: [push]
 
 jobs:
   build:
     name: Build and Unit test
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: '12'
-      - run: yarn --frozen-lockfile
-      - run: yarn build
-      - run: yarn test
+          node-version: '14'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
