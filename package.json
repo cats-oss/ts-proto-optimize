@@ -2,15 +2,16 @@
   "name": "@cats-oss/ts-proto-optimize",
   "version": "0.1.0",
   "description": "It's CLI tool for optimize TypeScript protobuf type-definition file.",
-  "scripts": {
-    "test": "jest",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "build": "tsc -p .",
-    "release:patch": "standard-version --release-as patch",
-    "release:minor": "standard-version --release-as minor",
-    "release:major": "standard-version --release-as major",
-    "prepublish": "npm run clean && npm run build"
+  "homepage": "https://github.com/cats-oss/ts-proto-optimize#readme",
+  "bugs": {
+    "url": "https://github.com/cats-oss/ts-proto-optimize/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/cats-oss/ts-proto-optimize.git"
+  },
+  "license": "MIT",
+  "author": "Cyberagent, Inc.",
   "bin": {
     "ts-proto-optimize": "bin/index.js"
   },
@@ -18,40 +19,54 @@
     "bin",
     "lib"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/cats-oss/ts-proto-optimize.git"
+  "scripts": {
+    "test": "jest",
+    "clean": "rimraf lib",
+    "build": "tsc -p .",
+    "format": "prettier --write .",
+    "release:patch": "standard-version --release-as patch",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "prepublish": "npm run clean && npm run build"
   },
-  "author": "Cyberagent, Inc.",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cats-oss/ts-proto-optimize/issues"
-  },
-  "homepage": "https://github.com/cats-oss/ts-proto-optimize#readme",
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "chalk": "^2.4.2",
-    "change-case": "^3.1.0",
-    "meow": "^5.0.0",
-    "mkdirp": "^0.5.1",
-    "typescript": "^3.5.3"
-  },
-  "devDependencies": {
-    "@types/change-case": "^2.3.1",
-    "@types/jest": "^24.0.19",
-    "@types/meow": "^5.0.0",
-    "@types/mkdirp": "^0.5.2",
-    "@types/node": "^12.7.2",
-    "jest": "^24.9.0",
-    "rimraf": "^3.0.0",
-    "standard-version": "^7.0.0",
-    "ts-jest": "^24.1.0"
+  "prettier": {
+    "arrowParens": "always",
+    "plugins": [
+      "prettier-plugin-packagejson"
+    ],
+    "singleQuote": true,
+    "trailingComma": "all"
   },
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
   },
-  "standard-version": {}
+  "dependencies": {
+    "chalk": "^4.1.1",
+    "change-case": "^4.1.2",
+    "meow": "^5.0.0",
+    "mkdirp": "^1.0.4",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/change-case": "^2.3.1",
+    "@types/jest": "^26.0.24",
+    "@types/meow": "^5.0.0",
+    "@types/mkdirp": "^1.0.2",
+    "@types/node": "^16.4.3",
+    "jest": "^27.0.6",
+    "prettier": "^2.3.2",
+    "prettier-plugin-packagejson": "^2.2.11",
+    "rimraf": "^3.0.2",
+    "standard-version": "^9.3.1",
+    "ts-jest": "^27.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "standard-version": {
+    "scripts": {
+      "postchangelog": "npm run format"
+    }
+  }
 }

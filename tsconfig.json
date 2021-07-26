@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "incremental": true,
-    "target": "es2015",
+    "incremental": false,
+    "target": "ES2018",
     "module": "commonjs",
-    "lib": [],
+    "pretty": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -11,12 +11,14 @@
     "rootDir": "src",
     "importHelpers": false,
     "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src/**/*"]
 }

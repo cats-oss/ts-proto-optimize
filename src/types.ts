@@ -1,3 +1,1 @@
-export type NamespaceReplacement = {
-  [key: string]: string | undefined;
-};
+export type NamespaceReplacement = Map<string, string>;

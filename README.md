@@ -38,7 +38,7 @@ $ $(npm bin)/ts-proto-optimize path/to/proto.d.ts --output dist/to/proto.ts
 **input:**
 
 ```typescript
-import * as $protobuf from "protobufjs";
+import * as $protobuf from 'protobufjs';
 
 /** Namespace root. */
 export namespace root {
@@ -71,7 +71,7 @@ export namespace root {
     enum Enum {
       KEY1_SNAKE_CASE = 0,
       KEY2_SNAKE_CASE = 1,
-      KEY3_SNAKE_CASE = 2
+      KEY3_SNAKE_CASE = 2,
     }
 
     namespace Nest {
@@ -79,7 +79,7 @@ export namespace root {
       enum Enum {
         KEY1 = 0,
         KEY2 = 1,
-        KEY3 = 2
+        KEY3 = 2,
       }
 
       /** Properties Data */
@@ -104,35 +104,35 @@ export namespace root {
 ```typescript
 /** Namespace root. */
 export declare namespace root {
-    /** Namespace api. */
-    export namespace api {
-        /** Properties of a Foo */
-        export interface IFoo {
-            /** Foo str */
-            str: (string);
-            /** Foo number */
-            num: (number);
-        }
-        export namespace Nest {
-            /** Properties Data */
-            export interface IData {
-                name: (string);
-                value: (number);
-                field: (root.api.Nest.IData);
-                enumratee: (RootApiNestEnum);
-            }
-        }
+  /** Namespace api. */
+  export namespace api {
+    /** Properties of a Foo */
+    export interface IFoo {
+      /** Foo str */
+      str: string;
+      /** Foo number */
+      num: number;
     }
+    export namespace Nest {
+      /** Properties Data */
+      export interface IData {
+        name: string;
+        value: number;
+        field: root.api.Nest.IData;
+        enumratee: RootApiNestEnum;
+      }
+    }
+  }
 }
 export enum RootApiEnum {
-    KEY1_SNAKE_CASE = 0,
-    KEY2_SNAKE_CASE = 1,
-    KEY3_SNAKE_CASE = 2
+  KEY1_SNAKE_CASE = 0,
+  KEY2_SNAKE_CASE = 1,
+  KEY3_SNAKE_CASE = 2,
 }
 export enum RootApiNestEnum {
-    KEY1 = 0,
-    KEY2 = 1,
-    KEY3 = 2
+  KEY1 = 0,
+  KEY2 = 1,
+  KEY3 = 2,
 }
 ```
 
