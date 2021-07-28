@@ -18,6 +18,17 @@ export declare namespace root {
                 [k: string]: string;
             });
         }
+        export namespace AdminService {
+            /** Properties of a Enumerate */
+            export interface IEnumerate {
+                /** Enumerate id */
+                id: (string);
+                /** Enumrate field */
+                field: (ExampleEnum);
+                /** Enumrate arr */
+                arr: (ExampleEnum[]);
+            }
+        }
         /** Properties of a Enumerate */
         export interface IEnumerate {
             /** Enumerate id */
@@ -48,6 +59,11 @@ export declare namespace depth1 {
             }
         }
     }
+}
+export enum ExampleAdminServiceEnum {
+    KEY1 = 0,
+    KEY2 = 1,
+    KEY3 = 2
 }
 export enum ExampleEnum {
     KEY1_SNAKE_CASE = 0,
@@ -80,6 +96,17 @@ export declare namespace root {
                 [k: string]: string;
             });
         }
+        export namespace AdminService {
+            /** Properties of a Enumerate */
+            export interface IEnumerate {
+                /** Enumerate id */
+                id: (string);
+                /** Enumrate field */
+                field: (RootApiEnum);
+                /** Enumrate arr */
+                arr: (RootApiEnum[]);
+            }
+        }
         /** Properties of a Enumerate */
         export interface IEnumerate {
             /** Enumerate id */
@@ -110,6 +137,11 @@ export declare namespace depth1 {
             }
         }
     }
+}
+export enum RootApiAdminServiceEnum {
+    KEY1 = 0,
+    KEY2 = 1,
+    KEY3 = 2
 }
 export enum RootApiEnum {
     KEY1_SNAKE_CASE = 0,

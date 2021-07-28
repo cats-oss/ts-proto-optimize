@@ -15,6 +15,7 @@ Optimize the definition of a protobuf that is only used to get type-safe. Compil
   - Keep the small bundle size.
 - Remove all `Long`, Nullable, and Optional.
 - Remove all `class`.
+- Remove all function declaration type aliases.
 - Add `export` keyword to `interface` in `namespace`.
 
 ## Installation
@@ -75,6 +76,16 @@ export namespace root {
     }
 
     namespace Nest {
+      /**
+       * Callback as used by {@link ...}.
+       * @param error Error, if any
+       * @param [response] GetFooResponse
+       */
+      type GetFooCallback = (
+        error: Error | null,
+        response?: root.api.GetFooResponse,
+      ) => void;
+
       /** Enum enum. */
       enum Enum {
         KEY1 = 0,

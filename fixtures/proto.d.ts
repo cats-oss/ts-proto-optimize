@@ -94,6 +94,25 @@ export namespace root {
        * @param [response] GetAnnouncementResponse
        */
       type GetAnnouncementCallback = (error: (Error|null), response?: love.api.v1.GetAnnouncementResponse) => void;
+
+      /** Enum enum. */
+      enum Enum {
+        KEY1 = 0,
+        KEY2 = 1,
+        KEY3 = 2
+      }
+
+      /** Properties of a Enumerate */
+      interface IEnumerate {
+        /** Enumerate id */
+        id?: string | null;
+
+        /** Enumrate field */
+        field?: root.api.Enum | null;
+
+        /** Enumrate arr */
+        arr?: root.api.Enum[] | null;
+      }
   }
 
     /** class Enumerate */
