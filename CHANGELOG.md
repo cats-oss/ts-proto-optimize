@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/cats-oss/ts-proto-optimize/compare/v0.1.0...v0.1.1) (2021-07-28)
+
+### Bug Fixes
+
+- Fix the process of deleting unnecessary namespaces ([785766d](https://github.com/cats-oss/ts-proto-optimize/commit/785766df743c3b8c6a49fc0f8c1f37292988cda6))
+
 ## 0.1.0 (2019-10-24)
 
 ### Features
