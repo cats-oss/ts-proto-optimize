@@ -197,16 +197,8 @@ const transformer =
         );
       }
 
-      return node;
-    };
-
-    /**
-     * Remove namespace
-     */
-    const removeNamespaceVisitor: ts.Visitor = (node) => {
-      node = ts.visitEachChild(node, removeNamespaceVisitor, context);
-
-      if (ts.isModuleDeclaration(node) && classList.has(node.name.text)) {
+      // Remove type alias (only function type)
+      if (ts.isTypeAliasDeclaration(node) && ts.isFunctionTypeNode(node.type)) {
         return undefined;
       }
 
@@ -241,7 +233,6 @@ const transformer =
     source.forEachChild(extractEnum(''));
     source = ts.visitNode(source, optimizeVisitor);
     source = ts.visitNode(source, declareVisitor);
-    source = ts.visitNode(source, removeNamespaceVisitor);
 
     // Append formatted `enum` list to node statements
     source = ts.factory.updateSourceFile(source as ts.SourceFile, [
