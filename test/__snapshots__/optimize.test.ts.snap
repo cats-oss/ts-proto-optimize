@@ -13,6 +13,8 @@ export declare namespace root {
             bool: (boolean);
             /** Foo number */
             num: (number);
+            /** Foo arrnum */
+            arrnum: ((number)[]);
             /** Foo metadata */
             metadata: ({
                 [k: string]: string;
@@ -91,6 +93,8 @@ export declare namespace root {
             bool: (boolean);
             /** Foo number */
             num: (number);
+            /** Foo arrnum */
+            arrnum: ((number)[]);
             /** Foo metadata */
             metadata: ({
                 [k: string]: string;

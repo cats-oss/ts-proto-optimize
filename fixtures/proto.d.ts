@@ -15,6 +15,9 @@ export namespace root {
       /** Foo number */
       num?: number | Long | null;
 
+      /** Foo arrnum */
+      arrnum?: ((number|Long)[]|null);
+
       /** Foo metadata */
       metadata?: { [k: string]: string } | null;
     }
