@@ -1,6 +1,6 @@
 {
   "name": "@cats-oss/ts-proto-optimize",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "It's CLI tool for optimize TypeScript protobuf type-definition file.",
   "homepage": "https://github.com/cats-oss/ts-proto-optimize#readme",
   "bugs": {

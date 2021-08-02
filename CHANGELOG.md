@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/cats-oss/ts-proto-optimize/compare/v0.1.1...v0.1.2) (2021-08-02)
+
+### Bug Fixes
+
+- remove `Long` in array type node ([5b430f7](https://github.com/cats-oss/ts-proto-optimize/commit/5b430f7927cdf483915552c654277f8afc691932))
+
 ### [0.1.1](https://github.com/cats-oss/ts-proto-optimize/compare/v0.1.0...v0.1.1) (2021-07-28)
 
 ### Bug Fixes
