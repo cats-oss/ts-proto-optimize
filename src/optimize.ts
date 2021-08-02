@@ -116,6 +116,7 @@ const transformer =
       //   - Concat `enum` name
       if (ts.isPropertySignature(node) && node.type != null) {
         let unionTypes: ts.NodeArray<ts.TypeNode> | null = null;
+
         if (ts.isUnionTypeNode(node.type)) {
           unionTypes = node.type.types;
         } else if (
@@ -127,39 +128,55 @@ const transformer =
         }
 
         if (unionTypes != null) {
-          ts.factory.createNull();
-          const types = unionTypes
-            .filter((t) => {
-              if (
-                ts.isLiteralTypeNode(t) &&
-                t.literal.kind === ts.SyntaxKind.NullKeyword
-              ) {
-                return false;
-              }
+          const unionTypeFilter = (n: ts.Node) => {
+            if (
+              ts.isLiteralTypeNode(n) &&
+              n.literal.kind === ts.SyntaxKind.NullKeyword
+            ) {
+              return false;
+            }
+
+            if (
+              ts.isTypeReferenceNode(n) &&
+              (<any>n.typeName).escapedText === 'Long'
+            ) {
+              return false;
+            }
+
+            return true;
+          };
+
+          const types = unionTypes.filter(unionTypeFilter).map((t) => {
+            if (ts.isArrayTypeNode(t)) {
+              let elementType = t.elementType;
 
               if (
-                ts.isTypeReferenceNode(t) &&
-                (<any>t.typeName).escapedText === 'Long'
+                ts.isParenthesizedTypeNode(t.elementType) &&
+                ts.isUnionTypeNode(t.elementType.type)
               ) {
-                return false;
-              }
-
-              return true;
-            })
-            .map((t) => {
-              if (ts.isArrayTypeNode(t)) {
-                return ts.factory.updateArrayTypeNode(
-                  t,
-                  updateTypeNodeIfNeeded(nsReplacement, t.elementType),
+                elementType = ts.factory.updateParenthesizedType(
+                  t.elementType,
+                  ts.factory.updateUnionTypeNode(
+                    t.elementType.type,
+                    ts.factory.createNodeArray(
+                      t.elementType.type.types.filter(unionTypeFilter),
+                    ),
+                  ),
                 );
               }
 
-              if (ts.isTypeReferenceNode(t)) {
-                return updateTypeNodeIfNeeded(nsReplacement, t);
-              }
+              return ts.factory.updateArrayTypeNode(
+                t,
+                updateTypeNodeIfNeeded(nsReplacement, elementType),
+              );
+            }
 
-              return t;
-            });
+            if (ts.isTypeReferenceNode(t)) {
+              return updateTypeNodeIfNeeded(nsReplacement, t);
+            }
+
+            return t;
+          });
 
           return ts.factory.updatePropertySignature(
             node,
