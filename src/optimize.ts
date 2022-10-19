@@ -100,6 +100,16 @@ const transformer =
         return undefined;
       }
 
+      // Remove `long`
+      if (
+        ts.isImportEqualsDeclaration(node) &&
+        ts.isExternalModuleReference(node.moduleReference) &&
+        ts.isStringLiteral(node.moduleReference.expression) &&
+        node.moduleReference.expression.text === 'long'
+      ) {
+        return undefined;
+      }
+
       // Remove `class` definition
       if (ts.isClassDeclaration(node)) {
         classList.add(node.name!.escapedText.toString());
